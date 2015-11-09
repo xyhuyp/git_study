@@ -1,0 +1,96 @@
+<#include "/common/layout.html"/>
+<@layout>
+<div class="container" ng-app="myApp" ng-controller="record_controller">
+	<div class="row clearfix">
+		<div class="col-md-12 column">
+			<table class="table table-bordered">
+				<thead>
+				<tr>
+					<th colspan="7" text-align="center">
+						<h3 align="center">工作日历</h3>
+					</th>
+				</tr>
+				</thead>
+				<tbody>
+				<tr>
+					<td>周日</td>
+					<td>周一</td>
+					<td>周二</td>
+					<td>周三</td>
+					<td>周四</td>
+					<td>周五</td>
+					<td>周六</td>
+				</tr>
+				<tr ng-repeat="weeks in rocord_month">
+					<td ng-repeat="_day in weeks" id="td_date_{{_day| date:'yyyy-MM-dd'}}">
+
+						<div class="container-fluid">
+							<div class="row-fluid">
+								<div>
+									<div  class="tabbable" id="tabs_{{_day| date:'yyyy-MM-dd'}}">
+										<ul class="nav nav-tabs">
+											<li class="active">
+												<a href="#panel_{{_day| date:'yyyy-MM-dd'}}_1" data-toggle="tab">信息</a>
+											</li>
+											<li>
+												<a href="#panel_{{_day| date:'yyyy-MM-dd'}}_2" data-toggle="tab">备注</a>
+											</li>
+										</ul>
+										<div class="tab-content">
+											<div class="tab-pane active" id="panel_{{_day| date:'yyyy-MM-dd'}}_1">
+												<ul class="nav nav-sidebar">
+													<li>
+														<span class="text-nowrap">日期:{{_day| date:'yyyy-MM-dd'}}</span>
+													</li>
+													<li>
+														<span class="text-nowrap">助教:{{tutor}}</span>
+													</li>
+												</ul>
+											</div>
+											<div class="tab-pane" id="panel_{{_day| date:'yyyy-MM-dd'}}_2">
+												<span>{{remarks}}</span>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+<script>
+	var app = angular.module('myApp', []);
+	app.controller('record_controller', function($scope) {
+		var _today = new Date();
+		var year = _today.getFullYear();
+		var month = _today.getMonth();
+		var firstDate = new Date(year, month, 1);
+
+		var lastNum = 1-_today.getDate()%7 + _today.getDay();
+
+		var nextMonthNum = 35 + lastNum;
+		var nextDay;
+		var months = new Array();
+		var week = new Array() ;
+		while(lastNum < nextMonthNum){
+			nextDay =  new Date;
+			nextDay.setTime(firstDate.getTime()  +  (lastNum++)*24 * 60 * 60 * 1000);
+			week.push(nextDay);
+			if(nextDay.getDate()%7==0){
+				months.push(week);
+				week = new Array();
+			}
+		}
+		months.push(week);
+		$scope.rocord_month = months;
+
+		$scope.popWindows = function(dateNum){
+			alert(dateNum);
+		}
+	});
+</script>
+</@layout>
