@@ -1,54 +1,75 @@
 <#include "/common/layout.html"/>
 <@layout>
 <div class="container" ng-app="myApp" ng-controller="record_controller">
+	<div class="row">
+		<form class="form-inline">
+			<div class="col-md-4 col-md-offset-2">
+				<div class="input-group">
+					<span class="input-group-addon">年份:</span>
+					<input type="number" class="form-control" placeholder="请输入年份" ng-model="record.year" aria-describedby="sizing-addon2">
+				</div>
+			</div>
+			<div class="col-md-4 ">
+				<div class="input-group">
+					<span class="input-group-addon">月份:</span>
+					<input type="number" class="form-control" placeholder="请输入月份" ng-model="record.month" aria-describedby="sizing-addon2">
+				</div>
+			</div>
+			<div class="col-md-1 ">
+				<div class="input-group">
+					<button type="button" class="btn btn-info" ng-click="generated()">生成</button>
+				</div>
+			</div>
+		</form>
+	</div>
 	<div class="row clearfix">
 		<div class="col-md-12 column">
 			<table class="table table-bordered">
 				<thead>
 				<tr>
 					<th colspan="7" text-align="center">
-						<h3 align="center">工作日历</h3>
+						<h3 align="center">{{record.year}}年{{record.month}}月工作日历</h3>
 					</th>
 				</tr>
 				</thead>
 				<tbody>
 				<tr>
-					<td>周日</td>
 					<td>周一</td>
 					<td>周二</td>
 					<td>周三</td>
 					<td>周四</td>
 					<td>周五</td>
 					<td>周六</td>
+					<td>周日</td>
 				</tr>
 				<tr ng-repeat="weeks in rocord_month">
-					<td ng-repeat="_day in weeks" id="td_date_{{_day| date:'yyyy-MM-dd'}}">
+					<td ng-repeat="_day in weeks" id="td_date_{{_day.localDate}}">
 
 						<div class="container-fluid">
 							<div class="row-fluid">
 								<div>
-									<div  class="tabbable" id="tabs_{{_day| date:'yyyy-MM-dd'}}">
+									<div  class="tabbable" id="tabs_{{_day.localDate}}">
 										<ul class="nav nav-tabs">
 											<li class="active">
-												<a href="#panel_{{_day| date:'yyyy-MM-dd'}}_1" data-toggle="tab">信息</a>
+												<a href="#panel_{{_day.localDate}}_1" data-toggle="tab">信息</a>
 											</li>
 											<li>
-												<a href="#panel_{{_day| date:'yyyy-MM-dd'}}_2" data-toggle="tab">备注</a>
+												<a href="#panel_{{_day.localDate}}_2" data-toggle="tab">备注</a>
 											</li>
 										</ul>
 										<div class="tab-content">
-											<div class="tab-pane active" id="panel_{{_day| date:'yyyy-MM-dd'}}_1">
+											<div class="tab-pane active" id="panel_{{_day.localDate}}_1">
 												<ul class="nav nav-sidebar">
 													<li>
-														<span class="text-nowrap">日期:{{_day| date:'yyyy-MM-dd'}}</span>
+														<span class="text-nowrap">日期:{{_day.localDate}}</span>
 													</li>
 													<li>
-														<span class="text-nowrap">助教:{{tutor}}</span>
+														<span class="text-nowrap">助教:{{_day.tutor}}</span>
 													</li>
 												</ul>
 											</div>
-											<div class="tab-pane" id="panel_{{_day| date:'yyyy-MM-dd'}}_2">
-												<span>{{remarks}}</span>
+											<div class="tab-pane" id="panel_{{_day.localDate}}_2">
+												<span title="{{_day.remarks|limitTo:6}}" >{{_day.remarks|limitTo:6}}</span>
 											</div>
 										</div>
 									</div>
@@ -63,34 +84,64 @@
 	</div>
 </div>
 <script>
-	var app = angular.module('myApp', []);
-	app.controller('record_controller', function($scope) {
-		var _today = new Date();
-		var year = _today.getFullYear();
-		var month = _today.getMonth();
-		var firstDate = new Date(year, month, 1);
+	var app = angular.module('myApp', [], function ($httpProvider) {
+		// Use x-www-form-urlencoded Content-Type
+		$httpProvider.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=utf-8';
 
-		var lastNum = 1-_today.getDate()%7 + _today.getDay();
+		/**
+		 * The workhorse; converts an object to x-www-form-urlencoded serialization.
+		 * @param {Object} obj
+		 * @return {String}
+		 */
+		var param = function(obj) {
+			var query = '', name, value, fullSubName, subName, subValue, innerObj, i;
 
-		var nextMonthNum = 35 + lastNum;
-		var nextDay;
-		var months = new Array();
-		var week = new Array() ;
-		while(lastNum < nextMonthNum){
-			nextDay =  new Date;
-			nextDay.setTime(firstDate.getTime()  +  (lastNum++)*24 * 60 * 60 * 1000);
-			week.push(nextDay);
-			if(nextDay.getDate()%7==0){
-				months.push(week);
-				week = new Array();
+			for(name in obj) {
+				value = obj[name];
+
+				if(value instanceof Array) {
+					for(i=0; i<value.length; ++i) {
+						subValue = value[i];
+						fullSubName = name + '[' + i + ']';
+						innerObj = {};
+						innerObj[fullSubName] = subValue;
+						query += param(innerObj) + '&';
+					}
+				}
+				else if(value instanceof Object) {
+					for(subName in value) {
+						subValue = value[subName];
+						fullSubName = name + '[' + subName + ']';
+						innerObj = {};
+						innerObj[fullSubName] = subValue;
+						query += param(innerObj) + '&';
+					}
+				}
+				else if(value !== undefined && value !== null)
+					query += encodeURIComponent(name) + '=' + encodeURIComponent(value) + '&';
 			}
-		}
-		months.push(week);
-		$scope.rocord_month = months;
 
-		$scope.popWindows = function(dateNum){
-			alert(dateNum);
-		}
+			return query.length ? query.substr(0, query.length - 1) : query;
+		};
+
+		// Override $http service's default transformRequest
+		$httpProvider.defaults.transformRequest = [function(data) {
+			return angular.isObject(data) && String(data) !== '[object File]' ? param(data) : data;
+		}];
+	});
+	app.controller('record_controller', function($scope,$http) {
+		var record = {};
+		var date = new Date();
+		record.year = date.getFullYear();
+		record.month = date.getMonth() + 1;
+		$scope.record = record;
+
+		$scope.generated = function(){
+			$http.post("/record/formatData",$scope.record).success(function(records){
+				$scope.rocord_month = records;
+			});
+		};
+
 	});
 </script>
 </@layout>

@@ -3,6 +3,7 @@ package com.demo.common;
 
 import com.demo.index.IndexController;
 
+import com.demo.record.CoCoRecord;
 import com.jfinal.config.*;
 import com.jfinal.core.JFinal;
 import com.jfinal.render.ViewType;
@@ -27,6 +28,7 @@ public class DemoConfig extends JFinalConfig {
 	 */
 	public void configRoute(Routes me) {
 		me.add("/", IndexController.class, "/index");	// 第三个参数为该Controller的视图存放路径
+		me.add("/record", CoCoRecord.class);	// 第三个参数为该Controller的视图存放路径
 	}
 	
 	/**
