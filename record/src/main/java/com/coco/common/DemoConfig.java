@@ -1,11 +1,16 @@
-package com.demo.common;
+package com.coco.common;
 
 
-import com.demo.index.IndexController;
+import com.coco.index.IndexController;
 
-import com.demo.record.CoCoRecord;
+import com.coco.record.CoCoRecord;
+import com.coco.record.RecordCenter;
 import com.jfinal.config.*;
 import com.jfinal.core.JFinal;
+import com.jfinal.plugin.activerecord.ActiveRecordPlugin;
+import com.jfinal.plugin.activerecord.dialect.Dialect;
+import com.jfinal.plugin.activerecord.dialect.PostgreSqlDialect;
+import com.jfinal.plugin.druid.DruidPlugin;
 import com.jfinal.render.ViewType;
 
 /**
@@ -35,7 +40,13 @@ public class DemoConfig extends JFinalConfig {
 	 * 配置插件
 	 */
 	public void configPlugin(Plugins me) {
-
+		DruidPlugin druidPlugin = new DruidPlugin(getProperty("jdbcUrl"), getProperty("user"), getProperty("password").trim());
+		me.add(druidPlugin);
+		// 配置ActiveRecord插件
+		ActiveRecordPlugin arp = new ActiveRecordPlugin(druidPlugin);
+		me.add(arp);
+		arp.setDialect(new PostgreSqlDialect());
+		arp.addMapping("record_center", RecordCenter.class);
 	}
 	
 	/**
@@ -52,4 +63,7 @@ public class DemoConfig extends JFinalConfig {
 		
 	}
 
+	public static void main(String[] args) {
+		JFinal.start("src/main/webapp", 8888, "/", 5);
+	}
 }

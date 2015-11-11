@@ -1,11 +1,9 @@
-package com.demo.record;
+package com.coco.record;
 
 import com.jfinal.core.Controller;
 
-import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,10 +13,13 @@ import java.util.List;
  */
 public class CoCoRecord  extends Controller{
 
+    public  void index(){
+       renderJson(RecordCenter.me.find("select * from Record_Center"));
+    }
 
     public void formatData(){
-        int year = getParaToInt("year");
-        int month = getParaToInt("month");
+        int year = getParaToInt("year",2015);
+        int month = getParaToInt("month",11);
         LocalDate firstDate = LocalDate.of(year,month,1);
 
         int beforeMinus = 1-firstDate.getDayOfWeek().getValue();

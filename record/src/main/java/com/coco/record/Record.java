@@ -1,7 +1,6 @@
-package com.demo.record;
+package com.coco.record;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 
 /**
  * Created by huyanpeng on 15-11-10.
