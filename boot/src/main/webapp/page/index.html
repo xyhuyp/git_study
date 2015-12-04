@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>主界面</title>
+<!-- 新 Bootstrap 核心 CSS 文件 -->
+<link rel="stylesheet"
+	href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+<!-- 可选的Bootstrap主题文件（一般不用引入） -->
+<link rel="stylesheet"
+	href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+
+<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+<script src="//cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>
+
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+</head>
+<body>
+	<div class="col-sm-6 col-sm-offset-3">
+		<form class="form-horizontal" role="form">
+			<fieldset>
+				<legend>登录</legend>
+				<div class="form-group">
+					<label class="col-sm-2 control-label" for="username">用户名:</label>
+					<div class="col-sm-4">
+						<input class="form-control" id="username" type="text"
+							placeholder="请输入用户名" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label" for="password">密码:</label>
+					<div class="col-sm-4">
+						<input class="form-control" id="password" type="password"
+							placeholder="请输入密码" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2 control-label" for="captcheCode">验证码:</label>
+					<div class="col-sm-3">
+						<input class="form-control" id="captchecodes" type="text"
+							style="width: 140px;" placeholder="请输入下方验证码" />
+					</div>
+					<div class="col-sm-2 ">
+						<button class="btn" id="refreshBtn">刷新</button>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-sm-4 col-sm-offset-2">
+						<img alt="点击刷新" src="/demo/captcheCode" id="captcheCode">
+					</div>
+				</div>
+			</fieldset>
+		</form>
+		<div class="col-sm-2  col-sm-offset-3">
+					<button class="btn btn-success" id="login">登录</button>
+		</div>
+	</div>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$("#refreshBtn").click(function(){
+				e.preventdefault();
+				refreshCode();
+			});
+			$("#login").click(function(){
+				var userName = $("#username").val();
+				var passWord = $("#password").val();
+				var captchecodes = $("#captchecodes").val();
+	            $.post("/demo/login",
+	            		{"userName":userName,
+	            	"passWord":passWord,
+	            	"captchecodes":captchecodes
+	           		 },function(data,status){  
+	                if(status=="success"){  
+	                	 $("body").html(data);
+	                }else{  
+	                    alert("数据加载失败");  
+	                }  
+	            }); 
+			});
+		});
+		function refreshCode(){
+			var capt = $(".captcheCode");
+			capt.attr("src",capt.attr("src")+"?" +new Date());
+		}
+	
+	</script>
+</body>
+</html>
